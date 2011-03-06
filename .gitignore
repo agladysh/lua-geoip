@@ -1,0 +1,15 @@
+*~
+.*~
+\#*\#
+.\#*\#
+
+.DS_Store
+.project
+.settings
+
+*.o
+*.so
+
+GeoIP.dat
+GeoLiteCity.dat
+
