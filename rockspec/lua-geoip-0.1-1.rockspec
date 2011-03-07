@@ -1,5 +1,5 @@
 package = "lua-geoip"
-version = "0.1"
+version = "0.1-1"
 source = {
    url = "git://github.com/agladysh/lua-geoip.git",
    branch = "v0.1"
