@@ -24,10 +24,12 @@ build = {
       geoip = {
          sources = {
             "src/lua-geoip.c"
+            "src/country.c"
          },
          incdirs = {
             "src/"
-         }
+         },
+         libraries = { "GeoIP" }
       }
    }
 }
