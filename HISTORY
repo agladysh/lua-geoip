@@ -1,3 +1,9 @@
+Version 0.1.1 (not released yet)
+================================
+
+* Made code more compartible with C89
+* Charset parameter no longer ignored in `city.open()` and `country.open()`.
+
 Version 0.1 (2011-03-07)
 ========================
 
