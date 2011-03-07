@@ -45,14 +45,14 @@ TODO: Document further. Meanwhile, see tests.
 
 ### On Debian / Ubuntu:
 
-$ sudo apt-get install geoip-database # GeoLite Country only
-$ sudo apt-get install libgeoip-dev
+    $ sudo apt-get install geoip-database # GeoLite Country only
+    $ sudo apt-get install libgeoip-dev
 
 ### Raw
 
-wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+    $ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
+    $ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
 
 ### C library
 
-http://www.maxmind.com/app/c
+    http://www.maxmind.com/app/c
