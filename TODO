@@ -3,6 +3,7 @@ TODO:
 
  -- Document current API.
  -- Fix file headers.
+ -- Run splint all over it, and fix errors.
  -- Generalize copy-pasted DB handling code
  -- Support GEOIP_COUNTRY_EDITION_V6 somehow (separate db type?)
  -- consider removing db type constants from binding
