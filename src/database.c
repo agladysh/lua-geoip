@@ -124,6 +124,8 @@ int luageoip_common_open_db(
     return 2; /* nil and error message already on stack */
   }
 
+  GeoIP_set_charset(pGeoIP, charset);
+
   pResult = lua_newuserdata(L, sizeof(luageoip_DB));
   pResult->pGeoIP = pGeoIP;
 

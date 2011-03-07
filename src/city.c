@@ -15,6 +15,7 @@
 
 static GeoIP * check_city_db(lua_State * L, int idx)
 {
+  int type = 0;
   luageoip_DB * pDB = (luageoip_DB *)luaL_checkudata(L, idx, LUAGEOIP_CITY_MT);
   if (pDB == NULL)
   {
@@ -28,7 +29,7 @@ static GeoIP * check_city_db(lua_State * L, int idx)
     return NULL;
   }
 
-  int type = GeoIP_database_edition(pDB->pGeoIP);
+  type = GeoIP_database_edition(pDB->pGeoIP);
   if (
       type != GEOIP_CITY_EDITION_REV0 &&
       type != GEOIP_CITY_EDITION_REV1
@@ -169,12 +170,12 @@ static int push_city_info(
 static int lcity_query_by_name(lua_State * L)
 {
   GeoIP * pGeoIP = check_city_db(L, 1);
+  const char * name = luaL_checkstring(L, 2);
+
   if (pGeoIP == NULL)
   {
     return lua_error(L); /* Error message already on stack */
   }
-
-  const char * name = luaL_checkstring(L, 2);
 
   return push_city_info(
       L, 3, GeoIP_record_by_name(pGeoIP, name)
@@ -184,12 +185,12 @@ static int lcity_query_by_name(lua_State * L)
 static int lcity_query_by_addr(lua_State * L)
 {
   GeoIP * pGeoIP = check_city_db(L, 1);
+  const char * addr = luaL_checkstring(L, 2);
+
   if (pGeoIP == NULL)
   {
     return lua_error(L); /* Error message already on stack */
   }
-
-  const char * addr = luaL_checkstring(L, 2);
 
   return push_city_info(
       L, 3, GeoIP_record_by_addr(pGeoIP, addr)
@@ -199,12 +200,12 @@ static int lcity_query_by_addr(lua_State * L)
 static int lcity_query_by_ipnum(lua_State * L)
 {
   GeoIP * pGeoIP = check_city_db(L, 1);
+  lua_Integer ipnum = luaL_checkinteger(L, 2); /* Hoping that value would fit */
+
   if (pGeoIP == NULL)
   {
     return lua_error(L); /* Error message already on stack */
   }
-
-  lua_Integer ipnum = luaL_checkinteger(L, 2); /* Hoping that value would fit */
 
   return push_city_info(
       L, 3, GeoIP_record_by_ipnum(pGeoIP, ipnum)
@@ -227,12 +228,12 @@ static int lcity_charset(lua_State * L)
 static int lcity_set_charset(lua_State * L)
 {
   GeoIP * pGeoIP = check_city_db(L, 1);
+  int charset = luaL_checkint(L, 2);
+
   if (pGeoIP == NULL)
   {
     return lua_error(L); /* Error message already on stack */
   }
-
-  int charset = luaL_checkint(L, 2);
 
   GeoIP_set_charset(pGeoIP, charset);
 
