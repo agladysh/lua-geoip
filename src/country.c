@@ -6,7 +6,7 @@
 #include "lua-geoip.h"
 #include "database.h"
 
-#define LUAGEOIP_COUNTRY_VERSION     "lua-geoip.country 0.1"
+#define LUAGEOIP_COUNTRY_VERSION     "lua-geoip.country 0.1.1"
 #define LUAGEOIP_COUNTRY_COPYRIGHT   "Copyright (C) 2011, lua-geoip authors"
 #define LUAGEOIP_COUNTRY_DESCRIPTION \
         "Bindings for MaxMind's GeoIP library (country database)"
