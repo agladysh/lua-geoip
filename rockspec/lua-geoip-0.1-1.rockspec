@@ -23,8 +23,28 @@ build = {
    modules = {
       geoip = {
          sources = {
-            "src/lua-geoip.c"
+            "src/lua-geoip.c",
+            "src/database.c"
+         },
+         incdirs = {
+            "src/"
+         },
+         libraries = { "GeoIP" }
+      },
+      ["geoip.country"] = {
+         sources = {
+            "src/database.c",
             "src/country.c"
+         },
+         incdirs = {
+            "src/"
+         },
+         libraries = { "GeoIP" }
+      },
+      ["geoip.city"] = {
+         sources = {
+            "src/database.c",
+            "src/city.c"
          },
          incdirs = {
             "src/"

@@ -25,7 +25,4 @@ typedef struct luageoip_DB
   GeoIP * pGeoIP;
 } luageoip_DB;
 
-#define LUAGEOIP_COUNTRY_MT "lua-geoip.db.country"
-#define LUAGEOIP_CITY_MT "lua-geoip.db.city"
-
-#endif // LUAGEOIP_LUA_GEOIP_H
+#endif /* LUAGEOIP_LUA_GEOIP_H */

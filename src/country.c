@@ -3,18 +3,21 @@
 *              See copyright information in file COPYRIGHT.
 */
 
-#include <fcntl.h>
-
 #include "lua-geoip.h"
+#include "database.h"
 
 #define LUAGEOIP_COUNTRY_VERSION     "lua-geoip.country 0.1"
 #define LUAGEOIP_COUNTRY_COPYRIGHT   "Copyright (C) 2011, lua-geoip authors"
 #define LUAGEOIP_COUNTRY_DESCRIPTION \
         "Bindings for MaxMind's GeoIP library (country database)"
 
-GeoIP * check_country_db(lua_State * L, int idx)
+static GeoIP * check_country_db(lua_State * L, int idx)
 {
-  luageoip_DB * pDB = (luageoip_DB *)luaL_checkudata(L, 1, LUAGEOIP_COUNTRY_MT);
+  luageoip_DB * pDB = (luageoip_DB *)luaL_checkudata(
+      L,
+      idx,
+      LUAGEOIP_COUNTRY_MT
+    );
   if (pDB == NULL)
   {
     lua_pushstring(L, "lua-geoip error: country db is null");
@@ -27,9 +30,10 @@ GeoIP * check_country_db(lua_State * L, int idx)
     return NULL;
   }
 
+  int type = GeoIP_database_edition(pDB->pGeoIP);
   if (
-      pDB->pGeoIP->databaseType != GEOIP_COUNTRY_EDITION &&
-      pDB->pGeoIP->databaseType != GEOIP_COUNTRY_EDITION_V6
+      type != GEOIP_COUNTRY_EDITION &&
+      type != GEOIP_COUNTRY_EDITION_V6
     )
   {
     lua_pushstring(L, "lua-geoip error: object is not a country db");
@@ -40,7 +44,7 @@ GeoIP * check_country_db(lua_State * L, int idx)
 }
 
 /* TODO: Handle when id 0? */
-int push_country_info_by_id(lua_State * L, int first_arg_idx, int id)
+static int push_country_info(lua_State * L, int first_arg_idx, int id)
 {
   static const int NUM_OPTS = 5;
   static const char * const opts[] =
@@ -121,7 +125,7 @@ static int lcountry_query_by_name(lua_State * L)
 
   const char * name = luaL_checkstring(L, 2);
 
-  return push_country_info_by_id(
+  return push_country_info(
       L, 3, GeoIP_id_by_name(pGeoIP, name)
     );
 }
@@ -136,7 +140,7 @@ static int lcountry_query_by_addr(lua_State * L)
 
   const char * addr = luaL_checkstring(L, 2);
 
-  return push_country_info_by_id(
+  return push_country_info(
       L, 3, GeoIP_id_by_addr(pGeoIP, addr)
     );
 }
@@ -151,7 +155,7 @@ static int lcountry_query_by_ipnum(lua_State * L)
 
   lua_Integer ipnum = luaL_checkinteger(L, 2); /* Hoping that value would fit */
 
-  return push_country_info_by_id(
+  return push_country_info(
       L, 3, GeoIP_id_by_ipnum(pGeoIP, ipnum)
     );
 }
@@ -230,118 +234,22 @@ static const luaL_reg M[] =
 /* Error message capture code inspired by code by Wolfgang Oertl. */
 static int lcountry_open(lua_State * L)
 {
-  /* First argument is checked later */
-  int flags = luaL_optint(L, 2, GEOIP_STANDARD);
-  int charset = luaL_optint(L, 2, GEOIP_CHARSET_UTF8);
-
-  GeoIP * pGeoIP = NULL;
-  luageoip_DB * pResult = NULL;
-
-  int old_stderr;
-  int pipefd[2];
-  char buf[256];
-
-  int error_reported = 0;
-
-  if ((flags & GEOIP_INDEX_CACHE) == GEOIP_INDEX_CACHE)
+  static const int allowed_types[] =
   {
-    /* TODO: Or is it concrete DB file problem? */
-    return luaL_error(
-        L,
-        "lua-geoip.country: can't open country db with INDEX_CACHE"
-      );
-  }
+    GEOIP_COUNTRY_EDITION,
+    GEOIP_COUNTRY_EDITION_V6
+  };
 
-  /* Errors are printed to stderr, capture them */
-  {
-    pipe(pipefd);
-    fcntl(pipefd[0], F_SETFL, O_NONBLOCK);
-    fcntl(pipefd[1], F_SETFL, O_NONBLOCK);
-    old_stderr = dup(2);
-    dup2(pipefd[1], 2);
-  }
-
-  if (lua_isnoneornil(L, 1))
-  {
-    pGeoIP = GeoIP_open_type(GEOIP_COUNTRY_EDITION, flags);
-  }
-  else
-  {
-    const char * filename = luaL_checkstring(L, 1);
-    if (filename == NULL)
-    {
-      lua_pushnil(L);
-      lua_pushfstring(
-          L,
-          "bad argument #1: filename or db type expected, got %s",
-          luaL_typename(L, 1)
-        );
-      error_reported = 1;
-    }
-    else
-    {
-      pGeoIP = GeoIP_open(filename, flags);
-    }
-  }
-
-  /* Cleanup error handling */
-  {
-    int n = read(pipefd[0], buf, sizeof(buf));
-    if (n >= 0)
-    {
-      buf[n] = 0;
-
-      if (!pGeoIP) /* ?! What to do otherwise? */
-      {
-        lua_pushnil(L);
-        lua_pushstring(L, buf);
-        error_reported = 1;
-      }
-    }
-
-    close(pipefd[0]);
-    close(pipefd[1]);
-    dup2(old_stderr, 2);
-  }
-
-  if (
-      pGeoIP &&
-      pGeoIP->databaseType != GEOIP_COUNTRY_EDITION &&
-      pGeoIP->databaseType != GEOIP_COUNTRY_EDITION_V6
-    )
-  {
-    lua_pushnil(L);
-    lua_pushstring(L, "lua-geoip error: file is not a country db");
-    error_reported = 1;
-
-    pGeoIP = NULL;
-  }
-
-  if (pGeoIP == NULL)
-  {
-    if (!error_reported)
-    {
-      lua_pushnil(L);
-      lua_pushliteral(L, "failed to open geoip database file");
-      error_reported = 1;
-    }
-
-    return 2; /* nil and error message already on stack */
-  }
-
-  pResult = lua_newuserdata(L, sizeof(luageoip_DB));
-  pResult->pGeoIP = pGeoIP;
-
-  if (luaL_newmetatable(L, LUAGEOIP_COUNTRY_MT))
-  {
-    luaL_register(L, NULL, M);
-    lua_pushvalue(L, -1);
-    lua_setfield(L, -2, "__index");
-  }
-
-  lua_setmetatable(L, -2);
-
-  return 1;
+  return luageoip_common_open_db(
+      L,
+      M,
+      GEOIP_COUNTRY_EDITION,
+      GEOIP_STANDARD,
+      LUAGEOIP_COUNTRY_MT,
+      GEOIP_INDEX_CACHE, /* not allowed */
+      2,
+      allowed_types
+    );
 }
 
 /* Lua module API */

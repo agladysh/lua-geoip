@@ -6,12 +6,21 @@ local socket = require 'socket'
 
 local geoip = require 'geoip'
 local geoip_country = require 'geoip.country'
+local geoip_city = require 'geoip.city'
 
 print("TESTING lua-geoip")
 print("")
 print("VERSION: ", assert(geoip._VERSION))
 print("DESCRIPTION: ", assert(geoip._DESCRIPTION))
 print("COPYRIGHT: ", assert(geoip._COPYRIGHT))
+print("")
+print("VERSION: ", assert(geoip_country._VERSION))
+print("DESCRIPTION: ", assert(geoip_country._DESCRIPTION))
+print("COPYRIGHT: ", assert(geoip_country._COPYRIGHT))
+print("")
+print("VERSION: ", assert(geoip_city._VERSION))
+print("DESCRIPTION: ", assert(geoip_city._DESCRIPTION))
+print("COPYRIGHT: ", assert(geoip_city._COPYRIGHT))
 print("")
 
 -- Check that required files exist
@@ -21,10 +30,14 @@ assert(io.open("./GeoLiteCity.dat", "r")):close()
 
 do
   local id = assert(geoip.id_by_code('RU'))
+
   assert(geoip.code_by_id(id) == 'RU')
   assert(geoip.code3_by_id(id) == 'RUS')
   assert(geoip.name_by_id(id) == 'Russian Federation')
-  assert(geoip.continent_by_id(id) == 'EU')
+
+  -- Depents on libgeoip version o_O
+  assert(geoip.continent_by_id(id) == 'EU' or geoip.continent_by_id(id) == 'AS')
+
   assert(geoip.region_name_by_code('RU', '77') == "Tver'") -- WTF? MSK?
   assert(geoip.time_zone_by_country_and_region('RU', '77') == 'Europe/Moscow')
 end
@@ -41,18 +54,30 @@ do
 end
 
 do
+  assert(geoip_city.open("./BADFILENAME") == nil)
+
+  --assert(geoip_city.open(nil, 2 ^ 10) == nil) -- TODO: This should fail
+  --assert(geoip_city.open(nil, nil, -1) == nil) -- TODO: This should fail
+
+  assert(geoip_city.open("./GeoIP.dat") == nil)
+end
+
+do
   local flags =
   {
     geoip.STANDARD;
     geoip.MEMORY_CACHE;
     geoip.CHECK_CACHE;
-    --geoip.INDEX_CACHE; -- not supported
+    geoip.INDEX_CACHE;
     geoip.MMAP_CACHE;
   }
 
   for _, flag in ipairs(flags) do
-    assert(geoip_country.open(nil, flag)):close()
-    assert(geoip_country.open("./GeoIP.dat", flag)):close()
+    if flag ~= geoip.INDEX_CACHE then
+      assert(geoip_country.open(nil, flag)):close()
+      assert(geoip_country.open("./GeoIP.dat", flag)):close()
+    end
+    assert(geoip_city.open("./GeoLiteCity.dat", flag)):close()
   end
 end
 
@@ -64,10 +89,16 @@ do
   geodb:close()
 end
 
-print()
+do
+  local geodb = assert(
+      geoip_city.open("./GeoLiteCity.dat")
+    )
+  geodb:close()
+  geodb:close()
+end
 
 do
-  local check = function(db, method, arg)
+  local check_country = function(db, method, arg)
     local id = assert(db[method](db, arg, "id"))
     assert(type(id) == "number")
 
@@ -96,21 +127,85 @@ do
     end
   end
 
-  local geodb = assert(geoip_country.open("./GeoIP.dat"))
+  local apack = function(...)
+    return select("#", ...), { ... }
+  end
 
-  check(geodb, "query_by_name", "google-public-dns-a.google.com")
-  check(geodb, "query_by_addr", "8.8.8.8")
-  check(geodb, "query_by_ipnum", 134744072) -- 8.8.8.8
+  local check_city = function(db, method, arg)
+    local keys =
+    {
+      "country_code";
+      "country_code3";
+      "country_name";
+      "region";
+      "city";
+      "postal_code";
+      "latitude";
+      "longitude";
+      "metro_code";
+      "dma_code";
+      "area_code";
+      "charset";
+      "continent_code";
+    }
 
-  geodb:close()
+    local all = assert(db[method](db, arg))
+
+    local nret, r = apack(db[method](db, arg, unpack(keys)))
+    assert(nret == #keys)
+
+    for i = 1, #keys do
+      assert(r[i] == all[keys[i]])
+      assert(r[i] == db[method](db, arg, keys[i]))
+    end
+  end
+
+  local geodb_country = assert(geoip_country.open("./GeoIP.dat"))
+  local geodb_city = assert(geoip_city.open("./GeoLiteCity.dat"))
+
+  local checkers =
+  {
+    [geodb_country] = check_country;
+    [geodb_city] = check_city;
+  }
+
+  for _, geodb in ipairs { geodb_country, geodb_city } do
+    local checker = checkers[geodb]
+
+    checker(geodb, "query_by_name", "google-public-dns-a.google.com")
+    checker(geodb, "query_by_addr", "8.8.8.8")
+    checker(geodb, "query_by_ipnum", 134744072) -- 8.8.8.8
+  end
+
+  geodb_country:close()
+  geodb_city:close()
 end
 
--- TODO: Test two DBs in parallel
-do
-  local geodb = assert(geoip_country.open("./GeoIP.dat"))
+-- TODO: Test two different DBs open in parallel work properly
+
+local profiles =
+{
+  {
+    name = "country";
+    module = geoip_country;
+    file = "./GeoIP.dat";
+    field = "id";
+  };
+  {
+    name = "city";
+    module = geoip_city;
+    file = "./GeoLiteCity.dat";
+    field = "country_code";
+  };
+}
+
+for i = 1, #profiles do
+  local p = profiles[i]
+
+  local geodb = assert(p.module.open(p.file))
 
   do
-    print("profiling ipnum queries") -- slow due to dns resolution
+    print(p.name, "profiling ipnum queries") -- slow due to dns resolution
 
     local num_queries = 1e5
 
@@ -119,10 +214,11 @@ do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_ipnum(134744072, "id")) -- 8.8.8.8
+      assert(geodb:query_by_ipnum(134744072, p.field)) -- 8.8.8.8
     end
 
     print(
+        p.name,
         num_queries / (socket.gettime() - time_start),
         "ipnum queries per second"
       )
@@ -130,7 +226,7 @@ do
   end
 
   do
-    print("profiling addr queries") -- slow due to dns resolution
+    print(p.name, "profiling addr queries") -- slow due to dns resolution
 
     local num_queries = 1e5
 
@@ -139,10 +235,11 @@ do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_name("8.8.8.8", "id"))
+      assert(geodb:query_by_name("8.8.8.8", p.field))
     end
 
     print(
+        p.name,
         num_queries / (socket.gettime() - time_start),
         "addr queries per second"
       )
@@ -150,7 +247,7 @@ do
   end
 
   do
-    print("profiling name queries")
+    print(p.name, "profiling name queries")
 
     local num_queries = 500 -- slow due to dns resolution
 
@@ -159,15 +256,18 @@ do
       if i % 50 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_name("ya.ru", "id"))
+      assert(geodb:query_by_name("ya.ru", p.field))
     end
 
     print(
+        p.name,
         num_queries / (socket.gettime() - time_start),
         "name queries per second"
       )
     print()
   end
+
+  geodb:close()
 end
 
 print("")
