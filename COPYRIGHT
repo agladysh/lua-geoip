@@ -2,7 +2,7 @@ lua-geoip bindings license
 --------------------------
 
 lua-geoip bindings module code is licensed under the terms of the MIT license
-reproduced below. This means that lua-inih is free software and can be used
+reproduced below. This means that lua-geoip is free software and can be used
 for both academic and commercial purposes at absolutely no cost.
 
 Note that MaxMind GeoIP library (not included) is licensed under LGPL 2.1,
