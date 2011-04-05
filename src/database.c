@@ -1,4 +1,5 @@
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "lua-geoip.h"
 #include "database.h"
@@ -40,7 +41,9 @@ int luageoip_common_open_db(
 
   /* Errors are printed to stderr, capture them */
   {
-    pipe(pipefd);
+    /* TODO: Handle failures */
+    int result = pipe(pipefd);
+    result = 0; /* While we're not handling failures, shut up compiler */
     fcntl(pipefd[0], F_SETFL, O_NONBLOCK);
     fcntl(pipefd[1], F_SETFL, O_NONBLOCK);
     old_stderr = dup(2);
@@ -81,7 +84,7 @@ int luageoip_common_open_db(
   {
     int type = GeoIP_database_edition(pGeoIP);
     int found = 0;
-    int i = 0;
+    size_t i = 0;
 
     for (i = 0; i < num_allowed_types; ++i)
     {
@@ -126,7 +129,7 @@ int luageoip_common_open_db(
 
   GeoIP_set_charset(pGeoIP, charset);
 
-  pResult = lua_newuserdata(L, sizeof(luageoip_DB));
+  pResult = (luageoip_DB *)lua_newuserdata(L, sizeof(luageoip_DB));
   pResult->pGeoIP = pGeoIP;
 
   if (luaL_newmetatable(L, mt_name))
