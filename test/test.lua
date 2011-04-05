@@ -8,6 +8,9 @@ local geoip = require 'geoip'
 local geoip_country = require 'geoip.country'
 local geoip_city = require 'geoip.city'
 
+local geoip_country_filename = select(1, ...) or "./GeoIP.dat"
+local geoip_city_filename = select(2, ...) or "./GeoLiteCity.dat"
+
 print("TESTING lua-geoip")
 print("")
 print("VERSION: ", assert(geoip._VERSION))
@@ -25,8 +28,8 @@ print("")
 
 -- Check that required files exist
 -- See README on info on how to get them
-assert(io.open("./GeoIP.dat", "r")):close()
-assert(io.open("./GeoLiteCity.dat", "r")):close()
+assert(io.open(geoip_country_filename, "r")):close()
+assert(io.open(geoip_city_filename, "r")):close()
 
 do
   local id = assert(geoip.id_by_code('RU'))
@@ -50,7 +53,7 @@ do
   --assert(geoip_country.open(nil, 2 ^ 10) == nil) -- TODO: This should fail
   --assert(geoip_country.open(nil, nil, -1) == nil) -- TODO: This should fail
 
-  assert(geoip_country.open("./GeoLiteCity.dat") == nil)
+  assert(geoip_country.open(geoip_city_filename) == nil)
 end
 
 do
@@ -59,7 +62,7 @@ do
   --assert(geoip_city.open(nil, 2 ^ 10) == nil) -- TODO: This should fail
   --assert(geoip_city.open(nil, nil, -1) == nil) -- TODO: This should fail
 
-  assert(geoip_city.open("./GeoIP.dat") == nil)
+  assert(geoip_city.open(geoip_country_filename) == nil)
 end
 
 do
@@ -75,15 +78,15 @@ do
   for _, flag in ipairs(flags) do
     if flag ~= geoip.INDEX_CACHE then
       assert(geoip_country.open(nil, flag)):close()
-      assert(geoip_country.open("./GeoIP.dat", flag)):close()
+      assert(geoip_country.open(geoip_country_filename, flag)):close()
     end
-    assert(geoip_city.open("./GeoLiteCity.dat", flag)):close()
+    assert(geoip_city.open(geoip_city_filename, flag)):close()
   end
 end
 
 do
   local geodb = assert(
-      geoip_country.open("./GeoIP.dat")
+      geoip_country.open(geoip_country_filename)
     )
   geodb:close()
   geodb:close()
@@ -91,7 +94,7 @@ end
 
 do
   local geodb = assert(
-      geoip_city.open("./GeoLiteCity.dat")
+      geoip_city.open(geoip_city_filename)
     )
   geodb:close()
   geodb:close()
@@ -160,8 +163,8 @@ do
     end
   end
 
-  local geodb_country = assert(geoip_country.open("./GeoIP.dat"))
-  local geodb_city = assert(geoip_city.open("./GeoLiteCity.dat"))
+  local geodb_country = assert(geoip_country.open(geoip_country_filename))
+  local geodb_city = assert(geoip_city.open(geoip_city_filename))
 
   local checkers =
   {
@@ -188,13 +191,13 @@ local profiles =
   {
     name = "country";
     module = geoip_country;
-    file = "./GeoIP.dat";
+    file = geoip_country_filename;
     field = "id";
   };
   {
     name = "city";
     module = geoip_city;
-    file = "./GeoLiteCity.dat";
+    file = geoip_city_filename;
     field = "country_code";
   };
 }
