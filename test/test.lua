@@ -38,7 +38,7 @@ do
   assert(geoip.code3_by_id(id) == 'RUS')
   assert(geoip.name_by_id(id) == 'Russian Federation')
 
-  -- Depents on libgeoip version o_O
+  -- Depends on libgeoip version o_O
   assert(geoip.continent_by_id(id) == 'EU' or geoip.continent_by_id(id) == 'AS')
 
   assert(geoip.region_name_by_code('RU', '77') == "Tver'") -- WTF? MSK?
