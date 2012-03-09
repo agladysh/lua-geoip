@@ -43,7 +43,7 @@ int luageoip_common_open_db(
   {
     /* TODO: Handle failures */
     int result = pipe(pipefd);
-    result = 0; /* While we're not handling failures, shut up compiler */
+    result = 0 + result; /* While we're not handling failures, shut up compiler */
     fcntl(pipefd[0], F_SETFL, O_NONBLOCK);
     fcntl(pipefd[1], F_SETFL, O_NONBLOCK);
     old_stderr = dup(2);

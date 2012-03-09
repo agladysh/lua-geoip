@@ -38,7 +38,7 @@ do
   assert(geoip.code3_by_id(id) == 'RUS')
   assert(geoip.name_by_id(id) == 'Russian Federation')
 
-  -- Depents on libgeoip version o_O
+  -- Depends on libgeoip version o_O
   assert(geoip.continent_by_id(id) == 'EU' or geoip.continent_by_id(id) == 'AS')
 
   assert(geoip.region_name_by_code('RU', '77') == "Tver'") -- WTF? MSK?
@@ -208,16 +208,21 @@ for i = 1, #profiles do
   local geodb = assert(p.module.open(p.file))
 
   do
-    print(p.name, "profiling ipnum queries") -- slow due to dns resolution
+    print(p.name, "profiling ipnum queries")
 
     local num_queries = 1e5
+
+    local cases = { }
+    for i = 1, num_queries do
+      cases[i] = math.random(0x7FFFFFFF)
+    end
 
     local time_start = socket.gettime()
     for i = 1, num_queries do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_ipnum(134744072, p.field)) -- 8.8.8.8
+      assert(geodb:query_by_ipnum(cases[i], p.field))
     end
 
     print(
@@ -233,12 +238,22 @@ for i = 1, #profiles do
 
     local num_queries = 1e5
 
+    local cases = { }
+    for i = 1, num_queries do
+      cases[i] = ('%d.%d.%d.%d'):format(
+          math.random(255),
+          math.random(255),
+          math.random(255),
+          math.random(255)
+        )
+    end
+
     local time_start = socket.gettime()
     for i = 1, num_queries do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_name("8.8.8.8", p.field))
+      assert(geodb:query_by_name(cases[i], p.field))
     end
 
     print(
