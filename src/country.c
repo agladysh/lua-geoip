@@ -245,7 +245,7 @@ static int lcountry_open(lua_State * L)
       L,
       M,
       GEOIP_COUNTRY_EDITION,
-      GEOIP_STANDARD,
+      GEOIP_MEMORY_CACHE,
       LUAGEOIP_COUNTRY_MT,
       GEOIP_INDEX_CACHE, /* not allowed */
       2,
