@@ -1,3 +1,10 @@
+Version 0.1.2 (2012-03-10)
+==========================
+
+* GEOIP_MEMORY_CACHE is now a default option when opening a DB
+* Fixed some compiler warnings
+* Improved tests
+
 Version 0.1.1 (2011-03-09)
 ==========================
 
