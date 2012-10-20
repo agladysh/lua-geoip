@@ -222,7 +222,10 @@ for i = 1, #profiles do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_ipnum(cases[i], p.field))
+      local result, err = geodb:query_by_ipnum(cases[i], p.field)
+      if not result and err ~= "not found" then
+        error(err)
+      end
     end
 
     print(
@@ -253,7 +256,10 @@ for i = 1, #profiles do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_name(cases[i], p.field))
+      local result, err = geodb:query_by_name(cases[i], p.field)
+      if not result and err ~= "not found" then
+        error(err)
+      end
     end
 
     print(
