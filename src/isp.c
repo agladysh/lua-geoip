@@ -1,7 +1,10 @@
 /*
-* isp.c: Bindings for MaxMind's GeoIP library
-*        See copyright information in file COPYRIGHT.
-*/
+ * isp.c:
+ *   LUA bindings for MaxMind's GeoIP library.
+ *   Abstracts accessors to the ISP database:
+ *     https://www.maxmind.com/en/isp.
+ *   See copyright information in file COPYRIGHT.
+ */
 
 #include "lua-geoip.h"
 #include "database.h"

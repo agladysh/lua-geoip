@@ -20,7 +20,8 @@ do
 end
 
 do
-  local flags = {
+  local flags =
+  {
     geoip.STANDARD;
     geoip.MEMORY_CACHE;
     geoip.CHECK_CACHE;
@@ -28,8 +29,8 @@ do
     geoip.MMAP_CACHE;
   }
 
-  for _, flag in ipairs(flags) do
-    assert(subject.open(filename, flag)):close()
+  for i=1,#flags do
+    assert(subject.open(filename, flags[i])):close()
   end
 end
 

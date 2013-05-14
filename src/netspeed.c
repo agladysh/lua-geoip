@@ -1,7 +1,10 @@
 /*
-* netspeed.c: Bindings for MaxMind's GeoIP library
-*             See copyright information in file COPYRIGHT.
-*/
+ * netspeed.c:
+ *   LUA bindings for MaxMind's GeoIP library.
+ *   Abstracts accessors to the NetSpeed database:
+ *     https://www.maxmind.com/en/netspeed.
+ *   See copyright information in file COPYRIGHT.
+ */
 
 #include "lua-geoip.h"
 #include "database.h"
