@@ -75,7 +75,8 @@ do
     geoip.MMAP_CACHE;
   }
 
-  for _, flag in ipairs(flags) do
+  for i=1,#flags do
+    local flag = flags[i]
     if flag ~= geoip.INDEX_CACHE then
       assert(geoip_country.open(nil, flag)):close()
       assert(geoip_country.open(geoip_country_filename, flag)):close()

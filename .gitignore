@@ -10,6 +10,4 @@
 *.o
 *.so
 
-GeoIP.dat
-GeoLiteCity.dat
-
+Geo*.dat

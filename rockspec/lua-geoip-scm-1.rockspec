@@ -50,6 +50,26 @@ build = {
             "src/"
          },
          libraries = { "GeoIP" }
+      },
+      ["geoip.isp"] = {
+         sources = {
+            "src/database.c",
+            "src/isp.c"
+         },
+         incdirs = {
+            "src/"
+         },
+         libraries = { "GeoIP" }
+      },
+      ["geoip.netspeed"] = {
+         sources = {
+            "src/database.c",
+            "src/netspeed.c"
+         },
+         incdirs = {
+            "src/"
+         },
+         libraries = { "GeoIP" }
       }
    }
 }
