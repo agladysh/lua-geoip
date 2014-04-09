@@ -78,6 +78,7 @@ int luageoip_common_open_db(
     close(pipefd[0]);
     close(pipefd[1]);
     dup2(old_stderr, 2);
+    close(old_stderr);
   }
 
   if (pGeoIP)
