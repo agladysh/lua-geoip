@@ -1,14 +1,14 @@
 LUA_VERSION	?= 5.1
 PREFIX		?= /usr
 CFLAGS		+= -O2 -Werror -pedantic -fPIC
-LDFLAGS		+= -shared
+LDFLAGS		+= -shared -lGeoIP
 LUA_INCLUDE_DIR	?= $(PREFIX)/include
 LUA_LIB_DIR	?= $(PREFIX)/lib
 LUA_CMODULE_DIR	?= $(DESTDIR)$(PREFIX)/lib/lua/$(LUA_VERSION)
 LUA_MODULE_DIR	?= $(DESTDIR)$(PREFIX)/share/lua/$(LUA_VERSION)
 LUA_BIN_DIR	?= $(DESTDIR)$(PREFIX)/bin
 INCLUDES	= -I$(LUA_INCLUDE_DIR) -Isrc
-INC_LIBS	= -L$(LUA_LIB_DIR) -lGeoIP
+INC_LIBS	= -L$(LUA_LIB_DIR)
 CC		= gcc
 INSTALL		= install
 
@@ -25,7 +25,7 @@ geoip/city.so: src/database.o src/city.o
 	$(CC) $(CFLAGS) $(INCLUDES) -c $^ -o $@
 
 %.so:
-	$(CC) $(LDFLAGS) $(INC_LIBS) $^ -o $@
+	$(CC) $(INC_LIBS) $^ -o $@ $(LDFLAGS)
 
 clean:
 	@rm -f geoip.so geoip/country.so geoip/city.so
