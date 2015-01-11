@@ -50,6 +50,16 @@ build = {
             "src/"
          },
          libraries = { "GeoIP" }
-      }
+      },                         
+      ["geoip.asnum"] = {
+         sources = {
+            "src/database.c",
+            "src/asnum.c"
+         },
+         incdirs = {
+            "src/"
+         },
+         libraries = { "GeoIP" }
+      } 
    }
 }
