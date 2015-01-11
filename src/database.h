@@ -7,6 +7,7 @@
 #define LUAGEOIP_DATABASE_H_
 
 #define LUAGEOIP_COUNTRY_MT "lua-geoip.db.country"
+#define LUAGEOIP_ASNUM_MT "lua-geoip.db.asnum"
 #define LUAGEOIP_CITY_MT "lua-geoip.db.city"
 
 int luageoip_common_open_db(
