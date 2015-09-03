@@ -195,8 +195,8 @@ static int lcountry_close(lua_State * L)
 
   if (pDB && pDB->pGeoIP != NULL)
   {
-  	GeoIP_delete(pDB->pGeoIP);
-  	pDB->pGeoIP = NULL;
+    GeoIP_delete(pDB->pGeoIP);
+    pDB->pGeoIP = NULL;
   }
 
   return 0;
@@ -245,7 +245,7 @@ static int lcountry_open(lua_State * L)
       L,
       M,
       GEOIP_COUNTRY_EDITION,
-      GEOIP_MEMORY_CACHE,
+      GEOIP_MEMORY_CACHE | GEOIP_SILENCE,
       LUAGEOIP_COUNTRY_MT,
       GEOIP_INDEX_CACHE, /* not allowed */
       2,
