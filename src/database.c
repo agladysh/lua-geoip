@@ -18,7 +18,7 @@ int luageoip_common_open_db(
 {
   /* First argument is checked later */
   int flags = luaL_optint(L, 2, default_flags);
-  int charset = luaL_optint(L, 2, GEOIP_CHARSET_UTF8);
+  int charset = luaL_optint(L, 3, GEOIP_CHARSET_UTF8);
 
   GeoIP * pGeoIP = NULL;
   luageoip_DB * pResult = NULL;
