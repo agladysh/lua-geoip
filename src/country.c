@@ -232,7 +232,6 @@ static const luaL_reg M[] =
   { NULL, NULL }
 };
 
-/* Error message capture code inspired by code by Wolfgang Oertl. */
 static int lcountry_open(lua_State * L)
 {
   static const int allowed_types[] =
@@ -245,7 +244,7 @@ static int lcountry_open(lua_State * L)
       L,
       M,
       GEOIP_COUNTRY_EDITION,
-      GEOIP_MEMORY_CACHE,
+      GEOIP_MEMORY_CACHE | GEOIP_SILENCE,
       LUAGEOIP_COUNTRY_MT,
       GEOIP_INDEX_CACHE, /* not allowed */
       2,

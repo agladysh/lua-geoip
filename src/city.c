@@ -295,7 +295,7 @@ static int lcity_open(lua_State * L)
       L,
       M,
       GEOIP_CITY_EDITION_REV1,
-      GEOIP_MEMORY_CACHE,
+      GEOIP_MEMORY_CACHE | GEOIP_SILENCE,
       LUAGEOIP_CITY_MT,
       0, /* all flags allowed */
       2,
