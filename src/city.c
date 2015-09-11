@@ -246,8 +246,8 @@ static int lcity_close(lua_State * L)
 
   if (pDB && pDB->pGeoIP != NULL)
   {
-  	GeoIP_delete(pDB->pGeoIP);
-  	pDB->pGeoIP = NULL;
+    GeoIP_delete(pDB->pGeoIP);
+    pDB->pGeoIP = NULL;
   }
 
   return 0;
