@@ -13,6 +13,14 @@ extern "C" {
 #include <lua.h>
 #include <lauxlib.h>
 
+#ifndef luaL_checkint
+#define luaL_checkint(L,n) luaL_checkinteger(L,n)
+#endif
+
+#ifndef luaL_optint
+#define luaL_optint(L,n,s) luaL_optinteger(L,n,s)
+#endif
+
 #if defined (__cplusplus)
 }
 #endif

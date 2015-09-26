@@ -6,7 +6,7 @@
 
 int luageoip_common_open_db(
     lua_State * L,
-    const luaL_reg * M,
+    const luaL_Reg * M,
     int default_type,
     int default_flags,
     const char * mt_name,
@@ -98,7 +98,11 @@ int luageoip_common_open_db(
 
   if (luaL_newmetatable(L, mt_name))
   {
+#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM < 502
     luaL_register(L, NULL, M);
+#else
+    luaL_setfuncs(L, M, 0);
+#endif
     lua_pushvalue(L, -1);
     lua_setfield(L, -2, "__index");
   }

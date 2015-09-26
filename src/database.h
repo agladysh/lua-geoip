@@ -11,7 +11,7 @@
 
 int luageoip_common_open_db(
     lua_State * L,
-    const luaL_reg * M,
+    const luaL_Reg * M,
     int default_type,
     int default_flags,
     const char * mt_name,

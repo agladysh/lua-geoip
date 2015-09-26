@@ -119,7 +119,7 @@ static int ltime_zone_by_country_and_region(lua_State * L)
 }
 
 /* Lua module API */
-static const struct luaL_reg R[] =
+static const struct luaL_Reg R[] =
 {
   { "code_by_id", lcode_by_id },
   { "code3_by_id", lcode3_by_id },
@@ -141,7 +141,13 @@ LUALIB_API int luaopen_geoip(lua_State * L)
   /*
   * Register module
   */
+
+#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM < 502
   luaL_register(L, "geoip", R);
+#else
+  lua_newtable(L);
+  luaL_setfuncs(L, R, 0);
+#endif
 
   /*
   * Register module information
