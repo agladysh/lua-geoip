@@ -1,5 +1,5 @@
 LUA_IMPL		?= lua5.1
-PREFIX			?= /usr
+DESTDIR			?= /
 PKG_CONFIG		?= pkg-config
 CC				?= gcc
 CFLAGS			?= -O2 -fPIC -DPIC $(shell $(PKG_CONFIG) $(LUA_IMPL) --cflags)
