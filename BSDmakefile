@@ -6,7 +6,7 @@ CC				?= gcc
 INSTALL			?= install
 LUA_CMOD_DIR	?= $(shell $(PKG_CONFIG) $(LUA_IMPL) --variable INSTALL_CMOD)
 
-CF				+= $(CFLAGS) -Werror -pedantic -Isrc
+CF				+= $(CFLAGS) -Werror -pedantic -std=c99 -Isrc
 LF				+= $(LDFLAGS) -shared -lGeoIP
 
 all: prepare geoip.so geoip/country.so geoip/city.so
