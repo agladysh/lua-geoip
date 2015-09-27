@@ -1,16 +1,13 @@
-LUA_VERSION	?= 5.1
-PREFIX		?= /usr
-CFLAGS		+= -O2 -Werror -pedantic -fPIC
-LDFLAGS		+= -shared -lGeoIP
-LUA_INCLUDE_DIR	?= $(PREFIX)/include
-LUA_LIB_DIR	?= $(PREFIX)/lib
-LUA_CMODULE_DIR	?= $(DESTDIR)$(PREFIX)/lib/lua/$(LUA_VERSION)
-LUA_MODULE_DIR	?= $(DESTDIR)$(PREFIX)/share/lua/$(LUA_VERSION)
-LUA_BIN_DIR	?= $(DESTDIR)$(PREFIX)/bin
-INCLUDES	= -I$(LUA_INCLUDE_DIR) -Isrc
-INC_LIBS	= -L$(LUA_LIB_DIR)
-CC		= gcc
-INSTALL		= install
+LUA_IMPL		?= lua5.1
+DESTDIR			?= /
+CFLAGS			?= -O2 -fPIC -DPIC
+PKG_CONFIG		?= pkg-config
+CC				?= gcc
+INSTALL			?= install
+LUA_CMOD_DIR	?= $(shell $(PKG_CONFIG) $(LUA_IMPL) --variable INSTALL_CMOD)
+
+CF				+= $(CFLAGS) -Werror -pedantic -std=c99 -Isrc
+LF				+= $(LDFLAGS) -shared -lGeoIP
 
 all: prepare geoip.so geoip/country.so geoip/city.so
 
@@ -18,16 +15,16 @@ prepare:
 	@mkdir -p geoip
 
 geoip.so: src/database.o src/lua-geoip.o
-	$(CC) $(INC_LIBS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(LF) $^ -o $@
 
 geoip/country.so: src/database.o src/country.o
-	$(CC) $(INC_LIBS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(LF) $^ -o $@
 
 geoip/city.so: src/database.o src/city.o
-	$(CC) $(INC_LIBS) $^ -o $@ $(LDFLAGS)
+	$(CC) $(LF) $^ -o $@
 
 .c.o:
-	$(CC) $(CFLAGS) $(INCLUDES) -c $^ -o $@
+	$(CC) $(CF) -c $^ -o $@
 
 clean:
 	@rm -f geoip.so geoip/country.so geoip/city.so
@@ -35,12 +32,12 @@ clean:
 	@rm -rf geoip
 
 install: all
-	$(INSTALL) -d $(LUA_CMODULE_DIR)/geoip
-	$(INSTALL) geoip/* $(LUA_CMODULE_DIR)/geoip
-	$(INSTALL) geoip.so $(LUA_CMODULE_DIR)
+	$(INSTALL) -d $(DESTDIR/)$(LUA_CMOD_DIR)/geoip
+	$(INSTALL) geoip/* $(DESTDIR)/$(LUA_CMOD_DIR)/geoip
+	$(INSTALL) geoip.so $(DESTDIR)/$(LUA_CMOD_DIR)
 
 uninstall:
-	@rm -f $(LUA_CMODULE_DIR)/geoip.so
-	@rm -rf $(LUA_CMODULE_DIR)/geoip
+	@rm -f $(LUA_CMOD_DIR)/geoip.so
+	@rm -rf $(LUA_CMOD_DIR)/geoip
 
 .SUFFIXES: .c .o .so

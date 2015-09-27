@@ -268,7 +268,7 @@ static int lcity_tostring(lua_State * L)
   return 1;
 }
 
-static const luaL_reg M[] =
+static const luaL_Reg M[] =
 {
   { "query_by_name", lcity_query_by_name },
   { "query_by_addr", lcity_query_by_addr },
@@ -304,7 +304,7 @@ static int lcity_open(lua_State * L)
 }
 
 /* Lua module API */
-static const struct luaL_reg R[] =
+static const struct luaL_Reg R[] =
 {
   { "open", lcity_open },
 
@@ -320,7 +320,12 @@ LUALIB_API int luaopen_geoip_city(lua_State * L)
   /*
   * Register module
   */
+#if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM < 502
   luaL_register(L, "geoip.city", R);
+#else
+  lua_newtable(L);
+  luaL_setfuncs(L, R, 0);
+#endif
 
   /*
   * Register module information
