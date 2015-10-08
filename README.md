@@ -43,7 +43,15 @@ TODO: Document further. Meanwhile, see tests.
 
 ## Where to get stuff?
 
-### On Debian / Ubuntu:
+### On Debian / Ubuntu Using PPA:
+
+MaxMind provides a PPA for recent version of Ubuntu. To add the PPA to your
+APT sources, run:
+
+    $ sudo add-apt-repository ppa:maxmind/ppa
+    $ sudo apt-get update
+
+Then install the packages by running:
 
     $ sudo apt-get install geoip-database # GeoLite Country only
     $ sudo apt-get install libgeoip-dev
