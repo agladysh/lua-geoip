@@ -44,52 +44,66 @@ static GeoIP * check_asnum_db(lua_State * L, int idx)
   return pDB->pGeoIP;
 }
 
+void GeoIP_org_by_delete(char *ptr)
+{
+    if (ptr) {
+        free(ptr);
+    }
+}
+
 
 static int lasnum_query_by_name(lua_State * L)
 {
   GeoIP * pGeoIP = check_asnum_db(L, 1);
+  const char *name = luaL_checkstring(L, 2);
   GeoIPLookup gl;
-  const char * name = luaL_checkstring(L, 2);
+  char *org;
 
   if (pGeoIP == NULL)
   {
     return lua_error(L); /* Error message already on stack */
   }
-
-   lua_pushstring(L, GeoIP_name_by_name_gl(pGeoIP, name, &gl));
-   return 1;
+  org = GeoIP_name_by_name_gl(pGeoIP, name, &gl);
+  lua_pushstring(L, org);
+  GeoIP_org_by_delete(org);
+  return 1;
 }
 
 
 static int lasnum_query_by_addr(lua_State * L)
 {
   GeoIP * pGeoIP = check_asnum_db(L, 1);
+  const char *addr = luaL_checkstring(L, 2);
   GeoIPLookup gl;
-  const char * addr = luaL_checkstring(L, 2);
+  char *org;
 
   if (pGeoIP == NULL)
   {
     return lua_error(L); /* Error message already on stack */
   }
 
-   lua_pushstring(L, GeoIP_name_by_addr_gl(pGeoIP, addr, &gl));
-   return 1;
+  org = GeoIP_name_by_addr_gl(pGeoIP, addr, &gl);
+  lua_pushstring(L, org);
+  GeoIP_org_by_delete(org);
+  return 1;
 }
 
 
 static int lasnum_query_by_ipnum(lua_State * L)
 {
   GeoIP * pGeoIP = check_asnum_db(L, 1);
+  lua_Integer ipnum = luaL_checkinteger(L, 2);
   GeoIPLookup gl;
-  const char * ipnum = luaL_checkstring(L, 2);
+  char *org;
 
   if (pGeoIP == NULL)
   {
     return lua_error(L); /* Error message already on stack */
   }
-
-   lua_pushstring(L, GeoIP_name_by_ipnum_gl(pGeoIP, ipnum, &gl));
-   return 1;
+  org = GeoIP_name_by_ipnum_gl(pGeoIP, ipnum, &gl);
+  lua_pushstring(L, org);
+  GeoIP_org_by_delete(org);
+  return 1;
 }
 
 
@@ -153,6 +167,7 @@ static const luaL_reg M[] =
 {
   { "query_by_name", lasnum_query_by_name },
   { "query_by_addr", lasnum_query_by_addr },
+  { "query_by_ipnum", lasnum_query_by_ipnum },
   { "charset", lasnum_charset },
   { "set_charset", lasnum_set_charset },
   { "close", lasnum_close },
