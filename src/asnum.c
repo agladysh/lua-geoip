@@ -63,6 +63,7 @@ static int lasnum_query_by_name(lua_State * L)
   {
     return lua_error(L); /* Error message already on stack */
   }
+
   org = GeoIP_name_by_name_gl(pGeoIP, name, &gl);
   lua_pushstring(L, org);
   GeoIP_org_by_delete(org);
@@ -100,6 +101,7 @@ static int lasnum_query_by_ipnum(lua_State * L)
   {
     return lua_error(L); /* Error message already on stack */
   }
+
   org = GeoIP_name_by_ipnum_gl(pGeoIP, ipnum, &gl);
   lua_pushstring(L, org);
   GeoIP_org_by_delete(org);
@@ -163,11 +165,12 @@ static int lasnum_tostring(lua_State * L)
   return 1;
 }
 
-static const luaL_reg M[] =
+static const luaL_Reg M[] =
 {
   { "query_by_name", lasnum_query_by_name },
   { "query_by_addr", lasnum_query_by_addr },
   { "query_by_ipnum", lasnum_query_by_ipnum },
+
   { "charset", lasnum_charset },
   { "set_charset", lasnum_set_charset },
   { "close", lasnum_close },
@@ -192,7 +195,7 @@ static int lasnum_open(lua_State * L)
       GEOIP_ASNUM_EDITION,
       GEOIP_MEMORY_CACHE,
       LUAGEOIP_ASNUM_MT,
-      GEOIP_INDEX_CACHE, /* not allowed */
+      0, /* all flags allowed */
       2,
       allowed_types
     );

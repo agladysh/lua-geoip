@@ -2,14 +2,17 @@
 
 pcall(require, 'luarocks.require')
 
+local math = require 'math'
 local socket = require 'socket'
 
 local geoip = require 'geoip'
 local geoip_country = require 'geoip.country'
 local geoip_city = require 'geoip.city'
+local geoip_asnum = require 'geoip.asnum'
 
 local geoip_country_filename = select(1, ...) or "./GeoIP.dat"
 local geoip_city_filename = select(2, ...) or "./GeoLiteCity.dat"
+local geoip_asnum_filename = select(3, ...) or "./GeoIPASNum.dat"
 
 print("TESTING lua-geoip")
 print("")
@@ -25,11 +28,16 @@ print("VERSION: ", assert(geoip_city._VERSION))
 print("DESCRIPTION: ", assert(geoip_city._DESCRIPTION))
 print("COPYRIGHT: ", assert(geoip_city._COPYRIGHT))
 print("")
+print("VERSION: ", assert(geoip_asnum._VERSION))
+print("DESCRIPTION: ", assert(geoip_asnum._DESCRIPTION))
+print("COPYRIGHT: ", assert(geoip_asnum._COPYRIGHT))
+print("")
 
 -- Check that required files exist
 -- See README on info on how to get them
 assert(io.open(geoip_country_filename, "r")):close()
 assert(io.open(geoip_city_filename, "r")):close()
+assert(io.open(geoip_asnum_filename, "r")):close()
 
 do
   local id = assert(geoip.id_by_code('RU'))
@@ -53,7 +61,7 @@ do
   --assert(geoip_country.open(nil, 2 ^ 10) == nil) -- TODO: This should fail
   --assert(geoip_country.open(nil, nil, -1) == nil) -- TODO: This should fail
 
-  assert(geoip_country.open(geoip_city_filename) == nil)
+  assert(geoip_country.open(geoip_asnum_filename) == nil)
 end
 
 do
@@ -63,6 +71,15 @@ do
   --assert(geoip_city.open(nil, nil, -1) == nil) -- TODO: This should fail
 
   assert(geoip_city.open(geoip_country_filename) == nil)
+end
+
+do
+  assert(geoip_asnum.open("./BADFILENAME") == nil)
+
+  --assert(geoip_asnum.open(nil, 2 ^ 10) == nil) -- TODO: This should fail
+  --assert(geoip_asnum.open(nil, nil, -1) == nil) -- TODO: This should fail
+
+  assert(geoip_asnum.open(geoip_country_filename) == nil)
 end
 
 do
@@ -77,9 +94,9 @@ do
 
   for _, flag in ipairs(flags) do
     if flag ~= geoip.INDEX_CACHE then
-      assert(geoip_country.open(nil, flag)):close()
       assert(geoip_country.open(geoip_country_filename, flag)):close()
     end
+    assert(geoip_asnum.open(geoip_asnum_filename, flag)):close()
     assert(geoip_city.open(geoip_city_filename, flag)):close()
   end
 end
@@ -95,6 +112,14 @@ end
 do
   local geodb = assert(
       geoip_city.open(geoip_city_filename)
+    )
+  geodb:close()
+  geodb:close()
+end
+
+do
+  local geodb = assert(
+      geoip_asnum.open(geoip_asnum_filename)
     )
   geodb:close()
   geodb:close()
@@ -163,16 +188,22 @@ do
     end
   end
 
+  local check_asnum = function(db, method, arg)
+    local org = assert(db[method](db, arg))
+  end
+
   local geodb_country = assert(geoip_country.open(geoip_country_filename))
   local geodb_city = assert(geoip_city.open(geoip_city_filename))
+  local geodb_asnum = assert(geoip_asnum.open(geoip_asnum_filename))
 
   local checkers =
   {
     [geodb_country] = check_country;
     [geodb_city] = check_city;
+    [geodb_asnum] = check_asnum;
   }
 
-  for _, geodb in ipairs { geodb_country, geodb_city } do
+  for _, geodb in ipairs { geodb_country, geodb_city, geodb_asnum } do
     local checker = checkers[geodb]
 
     checker(geodb, "query_by_name", "google-public-dns-a.google.com")
@@ -182,6 +213,7 @@ do
 
   geodb_country:close()
   geodb_city:close()
+  geodb_asnum:close()
 end
 
 -- TODO: Test two different DBs open in parallel work properly
@@ -200,12 +232,18 @@ local profiles =
     file = geoip_city_filename;
     field = "country_code";
   };
+  {
+    name = "asnum";
+    module = geoip_asnum;
+    file = geoip_asnum_filename;
+    field = "org";
+  };
 }
 
 for i = 1, #profiles do
   local p = profiles[i]
 
-  local geodb = assert(p.module.open(p.file))
+  local ok, geodb = pcall(p.module.open, p.file)
 
   do
     print(p.name, "profiling ipnum queries")
@@ -214,7 +252,7 @@ for i = 1, #profiles do
 
     local cases = { }
     for i = 1, num_queries do
-      cases[i] = math.random(0x7FFFFFFF)
+      cases[i] = math.random(0x60FFFFFF)
     end
 
     local time_start = socket.gettime()
@@ -222,9 +260,16 @@ for i = 1, #profiles do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      local result, err = geodb:query_by_ipnum(cases[i], p.field)
-      if not result and err ~= "not found" then
-        error(err)
+      if p.name ~= "asnum" then
+        local result, err = geodb:query_by_ipnum(cases[i], p.field)
+        if not result and err ~= "not found" then
+          error(err)
+        end
+      else
+        local ok, err = geodb:query_by_ipnum(cases[i])
+        if not ok and err ~= nil then
+          error(err)
+        end
       end
     end
 
@@ -256,9 +301,16 @@ for i = 1, #profiles do
       if i % 1e4 == 0 then
         print("#", i, "of", num_queries)
       end
-      local result, err = geodb:query_by_name(cases[i], p.field)
-      if not result and err ~= "not found" then
-        error(err)
+      if p.name ~= "asnum" then
+        local ok, err = geodb:query_by_addr(cases[i], p.field)
+        if not ok and err ~= "not found" then
+          error(err)
+        end
+      else
+        local ok, err = geodb:query_by_addr(cases[i])
+        if not ok and err ~= nil then
+          error(err)
+        end
       end
     end
 
@@ -280,7 +332,12 @@ for i = 1, #profiles do
       if i % 50 == 0 then
         print("#", i, "of", num_queries)
       end
-      assert(geodb:query_by_name("ya.ru", p.field))
+
+      if p.name == "asnum" then
+        assert(geodb:query_by_name("ya.ru"))
+      else
+        assert(geodb:query_by_name("ya.ru", p.field))
+      end
     end
 
     print(
