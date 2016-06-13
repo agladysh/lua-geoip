@@ -30,7 +30,7 @@ clean:
 	@rm -rf geoip
 
 install: all
-	$(INSTALL) -d $(DESTDIR/)$(LUA_CMOD_DIR)/geoip
+	$(INSTALL) -d $(DESTDIR)/$(LUA_CMOD_DIR)/geoip
 	$(INSTALL) geoip/* $(DESTDIR)/$(LUA_CMOD_DIR)/geoip
 	$(INSTALL) geoip.so $(DESTDIR)/$(LUA_CMOD_DIR)
 
