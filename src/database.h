@@ -8,6 +8,7 @@
 
 #define LUAGEOIP_COUNTRY_MT "lua-geoip.db.country"
 #define LUAGEOIP_CITY_MT "lua-geoip.db.city"
+#define LUAGEOIP_ASNUM_MT "lua-geoip.db.asnum"
 
 int luageoip_common_open_db(
     lua_State * L,
