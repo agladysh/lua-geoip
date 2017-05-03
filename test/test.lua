@@ -10,6 +10,7 @@ local geoip_city = require 'geoip.city'
 
 local geoip_country_filename = select(1, ...) or "./GeoIP.dat"
 local geoip_city_filename = select(2, ...) or "./GeoLiteCity.dat"
+local geoip_country6_filename = select(3, ...) or "./GeoIPv6.dat"
 
 print("TESTING lua-geoip")
 print("")
@@ -30,6 +31,7 @@ print("")
 -- See README on info on how to get them
 assert(io.open(geoip_country_filename, "r")):close()
 assert(io.open(geoip_city_filename, "r")):close()
+assert(io.open(geoip_country6_filename, "r")):close()
 
 do
   local id = assert(geoip.id_by_code('RU'))
@@ -182,6 +184,18 @@ do
 
   geodb_country:close()
   geodb_city:close()
+end
+
+-- Country IPv6 Edition
+do
+  local geodb_country6 = assert(geoip_country.open(geoip_country6_filename, geoip.MEMORY_CACHE, geoip.COUNTRY_V6))
+
+  res = geodb_country6:query_by_addr6("2a01:e0c:1::1")
+  assert(res.code == "FR")
+
+  res = geodb_country6:query_by_addr6("2a03:2880:f127:83:face:b00c:0:25de")
+  assert(res.code == "IE")
+  geodb_country6:close()
 end
 
 -- TODO: Test two different DBs open in parallel work properly
