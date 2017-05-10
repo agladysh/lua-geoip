@@ -3,8 +3,8 @@
 *              See copyright information in file COPYRIGHT.
 */
 
-#define LUAGEOIP_VERSION     "lua-geoip 0.1.1"
-#define LUAGEOIP_COPYRIGHT   "Copyright (C) 2011, lua-geoip authors"
+#define LUAGEOIP_VERSION     "lua-geoip 0.2"
+#define LUAGEOIP_COPYRIGHT   "Copyright (C) 2011-2017, lua-geoip authors"
 #define LUAGEOIP_DESCRIPTION "Bindings for MaxMind's GeoIP library"
 
 #include "lua-geoip.h"

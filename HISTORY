@@ -1,3 +1,11 @@
+Version 0.2 (2017-05-10)
+========================
+
+* IPv6 Lookup support for country
+* Lua5.2/5.3 compatibility
+* Remove the stderr capture and use the GEOIP_SILENCE flag instead
+* added makefiles
+
 Version 0.1.2 (2012-03-10)
 ==========================
 

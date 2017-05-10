@@ -8,8 +8,8 @@
 #include "lua-geoip.h"
 #include "database.h"
 
-#define LUAGEOIP_CITY_VERSION     "lua-geoip.city 0.1.1"
-#define LUAGEOIP_CITY_COPYRIGHT   "Copyright (C) 2011, lua-geoip authors"
+#define LUAGEOIP_CITY_VERSION     "lua-geoip.city 0.2"
+#define LUAGEOIP_CITY_COPYRIGHT   "Copyright (C) 2011-2017, lua-geoip authors"
 #define LUAGEOIP_CITY_DESCRIPTION \
         "Bindings for MaxMind's GeoIP library (city database)"
 
