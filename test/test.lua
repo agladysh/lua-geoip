@@ -194,7 +194,7 @@ do
   assert(res.code == "FR")
 
   res = geodb_country6:query_by_addr6("2a03:2880:f127:83:face:b00c:0:25de")
-  assert(res.code == "IE")
+  assert(res.code == "US")
   geodb_country6:close()
 end
 
