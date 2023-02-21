@@ -58,8 +58,10 @@ Then install the packages by running:
 
 ### Raw
 
-    $ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCountry/GeoIP.dat.gz
-    $ wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+    $ wget https://centminmod.com/centminmodparts/geoip-legacy/GeoIP.dat.gz
+    $ wget https://centminmod.com/centminmodparts/geoip-legacy/GeoLiteCity.gz
+    
+    from https://centminmod.com/centminmodparts/geoip-legacy/
 
 ### C library
 
